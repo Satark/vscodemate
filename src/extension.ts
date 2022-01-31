@@ -1,42 +1,14 @@
-import * as vscode from "vscode";
-import {search} from "./utils/search";
+import {ExtensionContext, languages} from "vscode";
+import {SmallCloudCodeLensProvider} from "./codelens/codeLensProvider";
+import {SmallCloudInlineCompletionProvider} from "./inlineCompletions/inlineCompletionProvider";
 
-export function activate(context: vscode.ExtensionContext) {
+export function activate(context: ExtensionContext) {
 	console.log('Congratulations, your extension is now active!');
-	const provider: vscode.InlineCompletionItemProvider<vscode.InlineCompletionItem> = {
-		provideInlineCompletionItems: async (document, position, context, token) => {
-			const textBeforeCursor = document.getText(
-				new vscode.Range(position.with(undefined, 0), position)
-			);
+	const inlineCompletionProvider = new SmallCloudInlineCompletionProvider();
+	languages.registerInlineCompletionItemProvider({ pattern: "**" }, inlineCompletionProvider);
 
-			let rs;
-			try {
-				rs = await search(textBeforeCursor);
-			} catch (err: unknown) {
-				if (err instanceof Error) {
-					vscode.window.showErrorMessage(err.toString());
-				}
-				return { items: [] };
-			}
-
-			if (rs === null) {
-				return { items: [] };
-			}
-
-			const items = rs.results.map(item => {
-				const output = `\n${item}`;
-				return {
-					text: output,
-					range: new vscode.Range(position.translate(0, output.length), position)
-				} as vscode.InlineCompletionItem;
-			});
-
-			return { items };
-
-		},
-	};
-
-	vscode.languages.registerInlineCompletionItemProvider({ pattern: "**" }, provider);
+	const codeLensProvider = new SmallCloudCodeLensProvider();
+	languages.registerCodeLensProvider("*", codeLensProvider);
 };
 
 // this method is called when your extension is deactivated
