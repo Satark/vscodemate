@@ -36,7 +36,13 @@
 					"default": 12
 				}
 			}
-		}
+		},
+		"commands": [
+			{
+				"command": "vscodemate.enhance",
+				"title": "Enhance code"
+			}
+		]
 	},
 	"enabledApiProposals": ["inlineCompletions"],
 	"scripts": {

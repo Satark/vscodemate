@@ -18,7 +18,7 @@ import {
 } from "vscode";
 
 import {
-	 BuiltInCommands
+	BuiltInCommands
 } from "../constants";
 
 export class SimpleCodeLens extends CodeLens {
@@ -59,6 +59,13 @@ export class SmallCloudCodeLensProvider implements CodeLensProvider {
 					symbol.location.range,
 				),
 			);
+			lenses.push(
+				new SimpleCodeLens(
+					document.languageId,
+					symbol,
+					symbol.location.range,
+				),
+			);
 			if (token.isCancellationRequested) {
 				return lenses;
 			}
@@ -85,7 +92,7 @@ export class SmallCloudCodeLensProvider implements CodeLensProvider {
 	): T {
 		lens.command = {
 			title: title,
-			command: '',
+			command: BuiltInCommands.Diff,
 		};
 		return lens;
 	}

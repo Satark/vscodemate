@@ -1,15 +1,35 @@
-import {ExtensionContext, languages} from "vscode";
+import {ExtensionContext, languages, commands, window, TextDocumentShowOptions} from "vscode";
 import {SmallCloudCodeLensProvider} from "./codelens/codeLensProvider";
+import {SmallCloudHoverProvider} from "./hover/hoverProvider";
 import {SmallCloudInlineCompletionProvider} from "./inlineCompletions/inlineCompletionProvider";
+import {BuiltInCommands} from "./constants";
 
 export function activate(context: ExtensionContext) {
-	console.log('Congratulations, your extension is now active!');
 	const inlineCompletionProvider = new SmallCloudInlineCompletionProvider();
-	languages.registerInlineCompletionItemProvider({ pattern: "**" }, inlineCompletionProvider);
+	languages.registerInlineCompletionItemProvider({pattern: "**"}, inlineCompletionProvider);
 
 	const codeLensProvider = new SmallCloudCodeLensProvider();
 	languages.registerCodeLensProvider("*", codeLensProvider);
+
+	const hoverProvider = new SmallCloudHoverProvider();
+	languages.registerHoverProvider("*", hoverProvider);
+
+	// ? CodeActionsProvider ?
+
+	const disposable = commands.registerCommand("vscodemate.enhance", async function () {
+		// Get the active text editor
+		const editor = window.activeTextEditor;
+
+		if (editor) {
+			const document = editor.document;
+			const selection = editor.selection;
+			const cursorPos = selection.active;
+			const enhancedUri = document.uri; // TODO get enhanced code, make uri for it TextDocumentContentProvider?
+			await commands.executeCommand(BuiltInCommands.Diff, document.uri, enhancedUri, "enhance preview", {preview: true, preserveFocus: true, selection: selection} as TextDocumentShowOptions);
+		}
+	});
+
+	context.subscriptions.push(disposable);
 };
 
-// this method is called when your extension is deactivated
 export function deactivate() {}

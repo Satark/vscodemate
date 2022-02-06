@@ -8,7 +8,7 @@ import {
 	Range,
 	window
 } from "vscode";
-import {search} from "../utils/search";
+import {search} from "../utils/network";
 
 
 export class SmallCloudInlineCompletionProvider implements InlineCompletionItemProvider<InlineCompletionItem> {
