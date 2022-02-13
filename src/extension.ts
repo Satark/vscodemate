@@ -8,13 +8,15 @@ export function activate(context: ExtensionContext) {
 	const inlineCompletionProvider = new SmallCloudInlineCompletionProvider();
 	languages.registerInlineCompletionItemProvider({pattern: "**"}, inlineCompletionProvider);
 
-	const codeLensProvider = new SmallCloudCodeLensProvider();
-	languages.registerCodeLensProvider("*", codeLensProvider);
+	// const codeLensProvider = new SmallCloudCodeLensProvider();
+	// languages.registerCodeLensProvider("*", codeLensProvider);
 
-	const hoverProvider = new SmallCloudHoverProvider();
-	languages.registerHoverProvider("*", hoverProvider);
+	// const hoverProvider = new SmallCloudHoverProvider();
+	// languages.registerHoverProvider("*", hoverProvider);
 
 	// ? CodeActionsProvider ?
+	// ? Diagnostic ?
+	// ? WorkspaceEdit ?
 
 	const disposable = commands.registerCommand("vscodemate.enhance", async function () {
 		// Get the active text editor

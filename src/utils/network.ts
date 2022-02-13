@@ -3,42 +3,44 @@ import axios from "axios";
 import * as https from "https";
 import { getConfig } from "../config";
 
-/**
- * Cache results to avoid VSCode keep refetching
- */
-const cachedResults: { [keyword: string]: string[] } = {};
 
-
-export async function search(keyword: string): Promise<null | { results: string[] }> {
-    if (keyword in cachedResults) {
-        return Promise.resolve({ results: cachedResults[keyword] });
-    }
-
+export async function getCompletions(currentLine: string, textBefore: string, textAfter: string, maxCompletions: number = 3): Promise<null | { results: string[] }> {
     const config = getConfig();
+    const secretKey = config.settings.token;
+    const requestUrl = config.settings.url + "/get_completions";
 
     /* eslint "no-async-promise-executor": "off" */
     const promise = new Promise<{ results: string[] }>(async (resolve, reject) => {
-
         let results: string[] = [];
-        let fetchResult: string;
 
         try {
-             const payload = { "keyword": keyword, "token": config.settings.token };
-             const agent = new https.Agent({
+            const payload = {
+                text_before: textBefore,
+                current_line: currentLine,
+                text_after: textAfter,
+                max_completions: maxCompletions
+            };
+            const agent = new https.Agent({
                 rejectUnauthorized: false
-              });
-            const result = await axios.post(config.settings.url, payload, { httpsAgent: agent });
+            });
+            const headers = {
+                secret_key: secretKey
+            };
 
-            if (result.status === 200) {
-                // TODO parse results
-                results = results.concat(result.data);
+            const response = await axios.post(requestUrl, payload, {httpsAgent: agent, headers: headers});
+
+            if (response.status === 200) {
+                const completions = response.data.completions || [];
+                for(const c of completions) {
+                    results.push(c.text);
+                }
+
                 vscode.window.setStatusBarMessage(`VSCodeMate: ${results.length} results`, 2000);
             } else {
-                vscode.window.setStatusBarMessage(`VSCodeMate error: ${result.data.error.message}`, 2000);
-                reject(result.data.error.message);
+                vscode.window.setStatusBarMessage(`VSCodeMate error: ${response.data.error.message}`, 2000);
+                reject(response.data.error.message);
             }
 
-            cachedResults[keyword] = results;
             resolve({ results });
         } catch (err) {
             reject(err);
