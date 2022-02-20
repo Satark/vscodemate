@@ -1,8 +1,9 @@
-import {ExtensionContext, languages, commands, window, TextDocumentShowOptions} from "vscode";
+import {ExtensionContext, languages, commands, window, TextDocumentShowOptions, workspace} from "vscode";
 import {SmallCloudCodeLensProvider} from "./codelens/codeLensProvider";
 import {SmallCloudHoverProvider} from "./hover/hoverProvider";
 import {SmallCloudInlineCompletionProvider} from "./inlineCompletions/inlineCompletionProvider";
 import {BuiltInCommands} from "./constants";
+import {DiffSender} from "./diff/diff";
 
 export function activate(context: ExtensionContext) {
 	const inlineCompletionProvider = new SmallCloudInlineCompletionProvider();
@@ -32,6 +33,12 @@ export function activate(context: ExtensionContext) {
 	});
 
 	context.subscriptions.push(disposable);
+
+	const diffSender = new DiffSender(
+		workspace.onDidOpenTextDocument,
+		workspace.onDidChangeTextDocument,
+		workspace.onDidCloseTextDocument
+	);
 };
 
 export function deactivate() {}
